@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Form</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <style>
+	select {
+	  width: 100%;
+	  padding: 10px;
+	  font-size: 16px;
+	  border-radius: 5px;
+	  border: 1px solid #ccc;
+	  background-color: #f2f2f2;
+	  border-color: #dcdcdc;
+	}
+	label {
+		font-size: 18px;
+	}
+	
+	input {
+	  width: 100%;
+	  padding: 10px;
+	  font-size: 16px;
+	  border-radius: 5px;
+	  border: 1px solid #ccc;
+	}
+	
+  </style>
+</head>
+
+<body>
+	<div id="app">
+		<label>Город:</label>
+		<select v-model="selectedCity" @change="onCityChanged">
+			<option disabled value="">Выберите город</option>
+			<option v-for="city in cities" :value="city">{{ city }}</option>
+		</select>
+		<br>
+		
+		<label>Цех:</label>
+		<select v-model="selectedFactory" @change="onFactoryChanged" :disabled="factories.length === 0">
+			<option disabled value="">Выберите цех</option>
+			<option v-for="factory in factories" :value="factory">{{ factory }}</option>
+		</select>
+		
+		<br>
+		
+		<label>Сотрудник:</label>
+		<select v-model="selectedEmployee" :disabled="employees.length === 0"> 
+			<option disabled value="">Выберите сотрудника</option>
+			<option v-for="employee in employees" :value="employee">{{ employee }}</option>
+		</select>
+		<br>
+		
+		<label>Бригада:</label>
+		<select v-model="selectedBrigade"> 
+			<option disabled value="">Выберите бригаду</option>
+			<option v-for="brigade in brigades" :value="brigade">{{ brigade }}</option>
+		</select>
+		
+		<br>
+		
+		<label>Смена:</label>
+		<input type="text" v-model="shift">
+		
+		<br>
+		
+		<button @click="onSave" style="background-color: #4CAF50; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer;">Сохранить</button>
+    
+   
+	</div>
+	<script src="node_modules/file-saver/src/FileSaver.js"></script>
+	<script>
+		
+		const FactoriesByCity = {
+			'Москва': ['Цех1', 'Цех2'],
+			'Санкт-Петербург': ['Цех3', 'Цех4'],
+			'Казань': ['Цех5', 'Цех6']
+		};
+		
+		const EmployeesByFactory = {
+				'Цех1': ['Работник1', 'Работник2'],
+				'Цех2': ['Работник3', 'Работник4'],
+				'Цех3': ['Работник5', 'Работник6'],
+				'Цех4': ['Работник7', 'Работник8'],
+				'Цех5': ['Работник9', 'Работник10'],
+				'Цех6': ['Работник11', 'Работник12']
+		};
+		
+		var app = new Vue({
+			
+			el: '#app',
+			data: {
+				cities: ['Москва', 'Санкт-Петербург', 'Казань'],
+				selectedCity: '',
+				
+				factories: [],
+				selectedFactory: '',
+				
+				employees: [],
+				selectedEmployee: '',
+				
+				brigades: ['Бригада 1', 'Бригада 2', 'Бригада 3'],
+				selectedBrigade: '',
+				
+				shift: '',
+				
+				
+			},
+			
+			methods: {
+				onCityChanged: function() {
+					this.selectedFactory = '';
+					this.employees = [];
+					this.selectedEmployee = '';
+					this.factories = this.getFactoriesByCity(this.selectedCity);
+				},
+				getFactoriesByCity: function(city) {
+					return FactoriesByCity[city] || [];
+				},
+				
+				onFactoryChanged: function() {
+					this.selectedEmployee = '';
+					this.employees = this.getEmployeesByFactory(this.selectedFactory)
+				},
+				getEmployeesByFactory: function(factory) {
+					return EmployeesByFactory[factory] || [];
+				},
+				
+				onSave() {
+					const formData = {
+						city: this.selectedCity,
+						factory: this.selectedFactory,
+						employee: this.selectedEmployee,
+						brigade: this.selectedBrigade,
+						shift: this.shift,
+					};
+					
+					const serializedForm = JSON.stringify(formData, null, 2);
+					
+					const blob = new Blob([serializedForm], { type: 'application/json' });
+					
+					saveAs(blob, 'form.json');
+				}
+			},
+		
+		})
+	</script>
+</body>
+
+</html>
+
+
